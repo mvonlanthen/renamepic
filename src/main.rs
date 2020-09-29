@@ -18,10 +18,17 @@ fn main() {
                  .takes_value(true)
                  .required(true)
                  .help("Folder with pictures to rename"))
+        .arg(Arg::with_name("list_exif")
+                 .short("le")
+                 .long("list-exif")
+                 .takes_value(true)
+                 .required(false)
+                 .help("list available exifs for a given picture"))
         .get_matches();
 
-    let myfile = matches.value_of("dir").unwrap_or("input.txt");
-    println!("The dir passed is: {}", myfile);
+    // let pictures_dir = matches.value_of("dir").unwrap_or("input.txt");
+    let pictures_dir = matches.value_of("dir").unwrap();
+    println!("The dir passed is: {}", pictures_dir);
 
     let x = 5;
     let y = 5.4;
