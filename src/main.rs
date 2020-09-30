@@ -1,4 +1,4 @@
-// use std::fs;
+use std::fs;
 // use std::any::type_name;
 use std::path;
 
@@ -27,28 +27,42 @@ fn main() {
                  .help("list available exifs for a given picture"))
         .get_matches();
 
-    // let pictures_dir = matches.value_of("dir").unwrap_or("input.txt");
     
-
     // Check if the folder passed as argument exists
-    let pictures_dir = matches.value_of("dir").unwrap();
-    // println!("The dir passed is: {}", pictures_dir);
-    if path::Path::new(pictures_dir).exists()==true {
-        println!("{} exists", pictures_dir);
+    // let pictures_dir = matches.value_of("dir").unwrap();
+    let pictures_dir = path::Path::new(matches.value_of("dir").unwrap());
+    println!("The dir passed is `{}`", pictures_dir.display());
+    if pictures_dir.exists()==true {
+        println!("`{}` exists", pictures_dir.display());
     } else {
-        println!("{} is not a valid directory. exit", pictures_dir);
+        println!("`{}` is not a valid directory. exit", pictures_dir.display());
         std::process::exit(1)
     }
 
     // list all the jpg in picture
+    let paths = fs::read_dir(pictures_dir).unwrap();
+    for path in paths {
+        let path = path.unwrap().path();
+        let extension = path.extension();
+        let filename = path.file_name();
+        println!(
+            "Path: {}, filename {}", 
+            path.display(),
+            filename.ok_or("No filename").unwrap().to_str().unwrap()
+            // extension.ok_or("No extension").unwrap()
+        );
+        // let foo = filename.ok_or("No filename").unwrap().to_str().unwrap();
+        // println!("Name: {:?}", filename.ok_or("No filename").unwrap());
+    }
         
 
 
 
 
-    let x = 5;
-    println!("the value of x is: {}", x)
-    // let y = 5.4;
+    let x:f32 = 5.0;
+    println!("the value of x is: {}", x);
+    let y = &x;
+    let z = y+x;
 
     // println!("{}",type_name::<i32>());
     // println!("{}",type_name::<f32>());
