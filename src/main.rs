@@ -5,6 +5,18 @@ use std::path;
 extern crate clap;
 use clap::{Arg, App};
 
+fn is_path_a_jpg(path: &path::PathBuf) -> bool {
+    let extension = &path.extension().;
+    let jpg_extenstions = vec!("jpg", "jpeg");
+    for jpg_ext in jpg_extenstions {
+        if extension==Some(jpg_ext) {
+            return true
+        } else {
+            return false
+        }
+    }
+}
+
 fn main() {
     println!("Hello, world!");
 
@@ -43,14 +55,23 @@ fn main() {
     let paths = fs::read_dir(pictures_dir).unwrap();
     for path in paths {
         let path = path.unwrap().path();
-        let extension = path.extension();
-        let filename = path.file_name();
-        println!(
-            "Path: {}, filename {}", 
-            path.display(),
-            filename.ok_or("No filename").unwrap().to_str().unwrap()
-            // extension.ok_or("No extension").unwrap()
-        );
+        let path_md = fs::metadata(&path).unwrap();
+        if path_md.is_file() {
+            println!("fielpath: {}", path.display())
+        }
+
+
+
+        // let path = path.unwrap().path();
+        // let extension = path.extension();
+        // let filename = path.file_name();
+        // let md = fs::metadata(&path).unwrap();
+        // println!(
+        //     "Path: {}, filename {}, is file: {}", 
+        //     path.display(),
+        //     filename.ok_or("No filename").unwrap().to_str().unwrap(),
+        //     md.is_file(),
+        // );
         // let foo = filename.ok_or("No filename").unwrap().to_str().unwrap();
         // println!("Name: {:?}", filename.ok_or("No filename").unwrap());
     }

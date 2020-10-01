@@ -20,7 +20,7 @@
                     "kind": "bin"
                 }
             },
-            "args": ["--dir", "/foo/bar/baz"],
+            "args": ["--dir", "/home/marcel/development/renamepics/tests"],
             "cwd": "${workspaceFolder}"
         },
         {
