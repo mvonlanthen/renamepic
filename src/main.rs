@@ -1,21 +1,12 @@
 use std::fs;
-// use std::any::type_name;
 use std::path;
+use std::ffi;
 
 extern crate clap;
 use clap::{Arg, App};
 
-fn is_path_a_jpg(path: &path::PathBuf) -> bool {
-    let extension = &path.extension().;
-    let jpg_extenstions = vec!("jpg", "jpeg");
-    for jpg_ext in jpg_extenstions {
-        if extension==Some(jpg_ext) {
-            return true
-        } else {
-            return false
-        }
-    }
-}
+// extern crate exif;
+// use exif;
 
 fn main() {
     println!("Hello, world!");
@@ -41,50 +32,62 @@ fn main() {
 
     
     // Check if the folder passed as argument exists
-    // let pictures_dir = matches.value_of("dir").unwrap();
     let pictures_dir = path::Path::new(matches.value_of("dir").unwrap());
-    println!("The dir passed is `{}`", pictures_dir.display());
-    if pictures_dir.exists()==true {
-        println!("`{}` exists", pictures_dir.display());
-    } else {
+    if pictures_dir.exists()==false {
         println!("`{}` is not a valid directory. exit", pictures_dir.display());
         std::process::exit(1)
     }
 
-    // list all the jpg in picture
+    // loop through each path and process if jpg
     let paths = fs::read_dir(pictures_dir).unwrap();
     for path in paths {
         let path = path.unwrap().path();
-        let path_md = fs::metadata(&path).unwrap();
-        if path_md.is_file() {
-            println!("fielpath: {}", path.display())
+        let jpg_exts = vec!["jpg", "jpeg", "JPG", "JPEG"];
+        let is_jpg = match path.extension() {
+            None => false,
+            Some(os_str) => {
+                jpg_exts.iter().any(|&i| i==os_str)
+            }
+        };
+
+        if is_jpg {
+            let file = fs::File::open(&path).unwrap();
+            let mut bufreader = std::io::BufReader::new(&file);
+            let exifreader = exif::Reader::new();
+            let exif = exifreader.read_from_container(&mut bufreader).unwrap();
+            // for f in exif.fields() {
+            //     println!("{} {} {}",
+            //                 f.tag, f.ifd_num, f.display_value().with_unit(&exif));
+            // }
+            let datetime = exif.get_field(
+                exif::Tag::DateTimeOriginal, 
+                exif::In::PRIMARY
+            ).unwrap();
+            let dt_string = datetime.display_value().to_string();
+
+            // println!("filename: {}, datetime: {}", 
+            //     &path.display(), 
+            //     dt_string
+            // );
+
+            // copy the jpg with it's new filename.
+            let base_path = path.parent().unwrap().to_str().unwrap();
+            let filename = path.file_name().and_then(ffi::OsStr::to_str).unwrap();
+            let tgt_path = format!("{}/{} - {}", base_path, dt_string, filename);
+            // let res = fs::copy(path, tgt_path);
+            let is_successful = match fs::copy(&path, &tgt_path) {
+                Ok(_nb_bytes) => true,
+                Err(_error) => false,
+            };
+            if is_successful==false {
+                println!(
+                    "file {} cannot be copied to {}",
+                    path.display(),
+                    tgt_path,
+                )
+            }
         }
 
-
-
-        // let path = path.unwrap().path();
-        // let extension = path.extension();
-        // let filename = path.file_name();
-        // let md = fs::metadata(&path).unwrap();
-        // println!(
-        //     "Path: {}, filename {}, is file: {}", 
-        //     path.display(),
-        //     filename.ok_or("No filename").unwrap().to_str().unwrap(),
-        //     md.is_file(),
-        // );
-        // let foo = filename.ok_or("No filename").unwrap().to_str().unwrap();
-        // println!("Name: {:?}", filename.ok_or("No filename").unwrap());
     }
-        
 
-
-
-
-    let x:f32 = 5.0;
-    println!("the value of x is: {}", x);
-    let y = &x;
-    let z = y+x;
-
-    // println!("{}",type_name::<i32>());
-    // println!("{}",type_name::<f32>());
 }
