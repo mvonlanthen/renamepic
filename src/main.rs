@@ -27,11 +27,19 @@ fn main() {
                  .long("list-exif")
                  .takes_value(true)
                  .required(false)
-                 .help("list available exifs for a given picture"))
+                 .help("list available exifs for a given picture pass after `le` flag"))
+        .arg(Arg::with_name("target_dir")
+                 .short("td")
+                 .long("taget-dir")
+                 .takes_value(false)
+                 .required(false)
+                 .default_value("false")
+                 .help("sepcify the traget directory"))
         .get_matches();
 
     
     // Check if the folder passed as argument exists
+    let foo = matches.value_of("target_dir").unwrap();
     let pictures_dir = path::Path::new(matches.value_of("dir").unwrap());
     if pictures_dir.exists()==false {
         println!("`{}` is not a valid directory. exit", pictures_dir.display());
@@ -73,6 +81,7 @@ fn main() {
             // copy the jpg with it's new filename.
             let base_path = path.parent().unwrap().to_str().unwrap();
             let filename = path.file_name().and_then(ffi::OsStr::to_str).unwrap();
+            // let mut tgt_path = String::new();
             let tgt_path = format!("{}/{} - {}", base_path, dt_string, filename);
             // let res = fs::copy(path, tgt_path);
             let is_successful = match fs::copy(&path, &tgt_path) {
