@@ -13,7 +13,10 @@ where `YYYY-MM-DD HH:MM:SS` is the DateTimeOriginal tag in the picture exif and 
 ### from the source
 1. Download and install the rust toolchain available [here](https://www.rust-lang.org/tools/install).
 2. Clone this repository.
-3. Go to the cloned repo and compile `renamepics` with  
+3. Go to the cloned repo and compile `renamepics` with
+```bash
+cargo build --release
+```
 
 
 ## Notes

@@ -5,12 +5,13 @@ use std::ffi;
 extern crate clap;
 use clap::{Arg, App};
 
-// extern crate exif;
+extern crate chrono;
+// use chrono::{NaiveDateTime};
+use chrono::prelude::*;
+extern crate exif;
 // use exif;
 
 fn main() {
-    println!("Hello, world!");
-
     let matches = App::new("renamepics")
         .version("0.1.0")
         .author("Marcel Vonlanthen")
@@ -74,31 +75,38 @@ fn main() {
                 exif::Tag::DateTimeOriginal, 
                 exif::In::PRIMARY
             ).unwrap();
-            let dt_string = datetime.display_value().to_string();
+            // let dt_string = datetime.display_value().to_string();
+
+            // parse the exif datetime with chrono
+            let datetime = NaiveDateTime::parse_from_str(
+                &datetime.display_value().to_string(), "%Y-%m-%d %H:%M:%S"
+            ).unwrap();
+            let dt_string = format!("{:02}{:02}{:02}-{:02}{:02}{:02}",
+                datetime.year(), datetime.month(), datetime.day(),
+                datetime.hour(), datetime.minute(), datetime.second());
 
             // Prepare the target name path for the jpeg
             let base_path = path.parent().unwrap().to_str().unwrap();
             let filename = path.file_name().and_then(ffi::OsStr::to_str).unwrap();
             let middle_string = match matches.value_of("middle_string") {
-                Some(s) => format!(" - {}", s),
+                Some(s) => format!("_{}", s),
                 None => String::from(""),
             };
-            let tgt_path = format!(
-                "{}/{}{} - {}", base_path, dt_string, middle_string, filename
-            );
+            let mut tgt_path = path::PathBuf::new();
+            tgt_path.push(base_path);
+            tgt_path.push(format!("{}{}_{}", dt_string, middle_string, filename));
 
             // copy the picture to its new location
-            let is_successful = match fs::copy(&path, &tgt_path) {
+            let _is_successful = match fs::copy(&path, &tgt_path) {
                 Ok(_nb_bytes) => true,
-                Err(_error) => false,
+                Err(error) =>{
+                    println!(
+                        "file {} cannot be copied to {}. error: {}", 
+                        path.display(), tgt_path.display(), error
+                    );
+                    false
+                },
             };
-            if is_successful==false {
-                println!(
-                    "file {} cannot be copied to {}",
-                    path.display(),
-                    tgt_path,
-                )
-            }
         }
 
     }
