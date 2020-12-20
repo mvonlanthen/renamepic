@@ -17,6 +17,7 @@ fn main() {
         .author("Marcel Vonlanthen")
         .about("rename pictures in a folder according their exif metadata. \
                 Mostly used with exif datetime information, or GPS informations.")
+        .version("0.6")
         .arg(Arg::with_name("source_dir")
                  .short("s")
                  .long("source-dir")
@@ -35,14 +36,21 @@ fn main() {
                  .takes_value(true)
                  .required(false)
                  .help("add a middle string between the exif datetime and the picture filename"))
+        .arg(Arg::with_name("del_org_name")
+                .short("d")
+                .long("del-org-name")
+                .takes_value(false)
+                .required(false)
+                .help("Remove the original name from the target image")
+                .multiple(false)
+            )
         .arg(Arg::with_name("list_exif")
                  .short("l")
                  .long("list-exif")
-                 .takes_value(true)
+                 .takes_value(false)
                  .required(false)
                  .help("list available exifs for a given picture pass after `le` \
                         flag (not implemented yet)"))
-        
         .get_matches();
 
     
@@ -87,17 +95,23 @@ fn main() {
                 datetime.hour(), datetime.minute(), datetime.second());
 
             // Prepare the target name path for the jpeg
-            // let base_path = path.parent().unwrap().to_str().unwrap();
-            let filename = path.file_name().and_then(ffi::OsStr::to_str).unwrap();
+            let filename_sufix = if matches.is_present("del_org_name") {
+                format!(".{}", path.extension().and_then(ffi::OsStr::to_str).unwrap())
+            } else {
+                format!("_{}", path.file_name().and_then(ffi::OsStr::to_str).unwrap())
+            };
+
+            // let filename = path.file_name().and_then(ffi::OsStr::to_str).unwrap();
+
             let middle_string = match matches.value_of("middle_string") {
                 Some(s) => format!("_{}", s),
                 None => String::from(""),
             };
             let mut tgt_path = path::PathBuf::new();
             tgt_path.push(matches.value_of("target_dir").unwrap());
-            tgt_path.push(format!("{}{}_{}", dt_string, middle_string, filename));
+            tgt_path.push(format!("{}{}{}", dt_string, middle_string, filename_sufix));
 
-            // copy the picture to its new location
+            // copy the picture to its new location, with its new name
             let _is_successful = match fs::copy(&path, &tgt_path) {
                 Ok(_nb_bytes) => true,
                 Err(error) =>{

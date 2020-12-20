@@ -1,10 +1,13 @@
 # renamepic
 
-Create copies of pictures in a directory. The copies are names 
+Rename all the pictures in a source directory from `orignal_name.org_ext` to 
+`YYYYMMDD-HHMMSS_orignal_name.org_ext` where `YYYYMMDD-HHMMSS` is the 
+DateTimeOriginal tag in the picture exif,`orignal_name` the picture original 
+name and  `org_ext` the picture original extension. The renamed images are saved 
+in the target directory given as input argument. 
 
-    YYYY-MM-DD HH:MM:SS - orignal_name.original_ext
+A
 
-where `YYYY-MM-DD HH:MM:SS` is the DateTimeOriginal tag in the picture exif and `orignal_name.original_ext` the original name of the picture. When scanning the directory, only the following picture type are processed: jpg, JPG, jpeg and JPEG.
 
 ## installation
 
@@ -14,10 +17,22 @@ where `YYYY-MM-DD HH:MM:SS` is the DateTimeOriginal tag in the picture exif and 
 1. Download and install the rust toolchain available [here](https://www.rust-lang.org/tools/install).
 2. Clone this repository.
 3. Go to the cloned repo and compile `renamepics` with
-```bash
-cargo build --release
-```
+    ```bash
+    cargo build --release
+    ```
+
+## Building
+For developer (and myself, otherwise I forget...). TODO:
+* compilation:
+    ```bash
+    cargo build --release
+    ```
+* cross platform compilation:
+* debug in Visual Studio Code:
+
+
 
 
 ## Notes
-* This is my very first "real" Rust application. More a testing ground than anything else! Feel free to comment  (good or bad) the code.
+* This is my very first "real" Rust application. More a testing ground than 
+anything else! Feel free to comment  (good or bad) the code.
