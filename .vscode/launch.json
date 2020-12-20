@@ -22,9 +22,12 @@
             },
             // "args": ["--dir", "/home/marcel/development/renamepics/tests"],
             "args": [
+                // "--del-org-name",
                 "-s", "tests/source_dir", 
                 "-t", "tests/target_dir",
-                "-m", "marcel"
+                "-m", "Marcel",
+                // "-d"
+                
             ],
             "cwd": "${workspaceFolder}"
         },
