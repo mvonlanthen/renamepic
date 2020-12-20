@@ -21,7 +21,11 @@
                 }
             },
             // "args": ["--dir", "/home/marcel/development/renamepics/tests"],
-            "args": ["--dir", "tests"],
+            "args": [
+                "-s", "tests/source_dir", 
+                "-t", "tests/target_dir",
+                "-m", "marcel"
+            ],
             "cwd": "${workspaceFolder}"
         },
         {

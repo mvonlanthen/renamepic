@@ -17,12 +17,18 @@ fn main() {
         .author("Marcel Vonlanthen")
         .about("rename pictures in a folder according their exif metadata. \
                 Mostly used with exif datetime information, or GPS informations.")
-        .arg(Arg::with_name("dir")
-                 .short("d")
-                 .long("dir")
+        .arg(Arg::with_name("source_dir")
+                 .short("s")
+                 .long("source-dir")
                  .takes_value(true)
                  .required(true)
-                 .help("Folder with pictures to rename"))
+                 .help("Source directory with pictures to rename"))
+                 .arg(Arg::with_name("target_dir")
+                 .short("t")
+                 .long("taget-dir")
+                 .takes_value(true)
+                 .required(true)
+                 .help("traget directory where the renamed images will go"))
         .arg(Arg::with_name("middle_string")
                  .short("m")
                  .long("middle-string")
@@ -36,24 +42,19 @@ fn main() {
                  .required(false)
                  .help("list available exifs for a given picture pass after `le` \
                         flag (not implemented yet)"))
-        .arg(Arg::with_name("target_dir")
-                 .short("t")
-                 .long("taget-dir")
-                 .takes_value(false)
-                 .required(false)
-                 .help("sepcify the traget directory (not implemented yet)"))
+        
         .get_matches();
 
     
     // Check if the folder passed as argument exists
     // let foo = matches.value_of("target_dir").unwrap();
-    let pictures_dir = path::Path::new(matches.value_of("dir").unwrap());
+    let pictures_dir = path::Path::new(matches.value_of("source_dir").unwrap());
     if pictures_dir.exists()==false {
         println!("`{}` is not a valid directory. exit", pictures_dir.display());
         std::process::exit(1)
     }
 
-    // loop through each path and process if jpg
+    // list all item in `dir` and loop through each item (`paths`) and process if jpg
     let paths = fs::read_dir(pictures_dir).unwrap();
     for path in paths {
         let path = path.unwrap().path();
@@ -77,7 +78,7 @@ fn main() {
             ).unwrap();
             // let dt_string = datetime.display_value().to_string();
 
-            // parse the exif datetime with chrono
+            // parse the exif datetime with chrono and convert it into a string
             let datetime = NaiveDateTime::parse_from_str(
                 &datetime.display_value().to_string(), "%Y-%m-%d %H:%M:%S"
             ).unwrap();
@@ -86,14 +87,14 @@ fn main() {
                 datetime.hour(), datetime.minute(), datetime.second());
 
             // Prepare the target name path for the jpeg
-            let base_path = path.parent().unwrap().to_str().unwrap();
+            // let base_path = path.parent().unwrap().to_str().unwrap();
             let filename = path.file_name().and_then(ffi::OsStr::to_str).unwrap();
             let middle_string = match matches.value_of("middle_string") {
                 Some(s) => format!("_{}", s),
                 None => String::from(""),
             };
             let mut tgt_path = path::PathBuf::new();
-            tgt_path.push(base_path);
+            tgt_path.push(matches.value_of("target_dir").unwrap());
             tgt_path.push(format!("{}{}_{}", dt_string, middle_string, filename));
 
             // copy the picture to its new location
